@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/app/components/layout/DashboardLayout";
 import Table from "@/app/components/ui/Table";
 import Button from "@/app/components/ui/Button";
@@ -23,6 +24,9 @@ import { getBooks } from "@/app/lib/api/books-service";
 import type { BookCopy, Book, BookCopyStatus } from "@/app/types/library";
 
 export default function BookCopiesPage() {
+  const searchParams = useSearchParams();
+  const bookIdParam = searchParams.get("book");
+
   const [bookCopies, setBookCopies] = useState<BookCopy[]>([]);
   const [filteredCopies, setFilteredCopies] = useState<BookCopy[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
@@ -50,7 +54,7 @@ export default function BookCopiesPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [bookIdParam]);
 
   useEffect(() => {
     applyFilters();
@@ -60,8 +64,9 @@ export default function BookCopiesPage() {
     try {
       setLoading(true);
       setError("");
+      const bookId = bookIdParam ? parseInt(bookIdParam) : undefined;
       const [copiesData, booksData] = await Promise.all([
-        getBookCopies(),
+        getBookCopies(bookId ? { book: bookId } : undefined),
         getBooks(),
       ]);
       setBookCopies(copiesData);
@@ -335,11 +340,20 @@ export default function BookCopiesPage() {
     );
   }
 
+  const filteredBook = bookIdParam ? books.find(b => b.id === parseInt(bookIdParam)) : null;
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-text">Book Copies Management</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-text">Book Copies Management</h1>
+            {filteredBook && (
+              <p className="text-sm text-gray-600 mt-1">
+                Showing copies for: <span className="font-semibold">{filteredBook.title}</span> by {filteredBook.author_name}
+              </p>
+            )}
+          </div>
           <Button variant="primary" onClick={openCreateModal}>
             Add New Copy
           </Button>

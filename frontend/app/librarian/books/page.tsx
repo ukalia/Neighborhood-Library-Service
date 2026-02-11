@@ -31,6 +31,7 @@ export default function BooksManagementPage() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -51,7 +52,7 @@ export default function BooksManagementPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [showArchived]);
 
   useEffect(() => {
     if (success) {
@@ -63,8 +64,9 @@ export default function BooksManagementPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      const params = showArchived ? { include_archived: true } : undefined;
       const [booksData, authorsData] = await Promise.all([
-        getBooks(),
+        getBooks(params),
         getAuthors(),
       ]);
       setBooks(booksData);
@@ -312,11 +314,22 @@ export default function BooksManagementPage() {
           </Alert>
         )}
 
-        <SearchBar
-          placeholder="Search by title, author, or ISBN..."
-          onSearch={handleSearch}
-          loading={searchLoading}
-        />
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <SearchBar
+            placeholder="Search by title, author, or ISBN..."
+            onSearch={handleSearch}
+            loading={searchLoading}
+            className="w-full sm:flex-1"
+          />
+
+          <Button
+            variant={showArchived ? "primary" : "secondary"}
+            size="sm"
+            onClick={() => setShowArchived(!showArchived)}
+          >
+            {showArchived ? "Hide Archived" : "Show Archived"}
+          </Button>
+        </div>
 
         <Table
           columns={columns}

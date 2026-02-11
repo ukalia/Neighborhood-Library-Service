@@ -54,6 +54,8 @@ class BookViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Book.objects.select_related('author').all()
+        if self.action == 'unarchive':
+            return queryset
         if not self.request.query_params.get('include_archived', False):
             queryset = queryset.filter(is_archived=False)
         return queryset

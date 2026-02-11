@@ -15,7 +15,7 @@ export const getBooks = async (params?: BookQueryParams): Promise<Book[]> => {
   const queryString = params
     ? new URLSearchParams(
         Object.entries(params)
-          .filter(([, value]) => value !== undefined)
+          .filter(([, value]) => value !== undefined && value !== null)
           .map(([key, value]) => [key, String(value)])
       ).toString()
     : "";

@@ -225,6 +225,7 @@ export interface BookQueryParams {
   search?: string;
   author?: number;
   is_archived?: boolean;
+  include_archived?: boolean;
   ordering?: "title" | "created_at" | "-title" | "-created_at";
 }
 

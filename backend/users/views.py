@@ -111,9 +111,10 @@ class MemberViewSet(viewsets.ModelViewSet):
         return User.objects.filter(role=User.MEMBER).annotate(
             active_borrows_count=Count(
                 'active_borrowed_copies',
-                filter=Q(active_borrowed_copies__status=BookCopy.BORROWED)
+                filter=Q(active_borrowed_copies__status=BookCopy.BORROWED),
+                distinct=True
             ),
-            total_borrows_count=Count('borrowed_book_copies')
+            total_borrows_count=Count('borrowed_book_copies', distinct=True)
         )
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])

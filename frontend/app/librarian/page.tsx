@@ -162,12 +162,14 @@ export default function LibrarianPage() {
       setBorrowFormData({ barcode: "", member_id: 0 });
       setBorrowFormErrors({});
 
-      const [overviewData, transactionsData] = await Promise.all([
+      const [overviewData, transactionsData, membersData] = await Promise.all([
         getLibraryOverview(),
         getTransactions({ active_only: false }),
+        getMembers({ is_active: true }),
       ]);
       setOverview(overviewData);
       setRecentTransactions(transactionsData.slice(0, 5));
+      setMembers(membersData);
 
       setTimeout(() => setBorrowSuccess(""), 3000);
     } catch (err) {
