@@ -190,64 +190,78 @@ docker-compose up
 
 ## Allowed Librarian Actions
 
-Librarians have full administrative access to manage the library system:
+Librarians have full administrative access to manage the library system through the following UI pages:
+
+### Dashboard
+- View library overview statistics (total books, active borrows, overdue items, etc.)
+- Quick issue books to members (by barcode and member selection)
+- Quick process book returns (by barcode)
 
 ### Member Management
-- View all members
+- View all members (with filters for active/inactive status)
 - Create new member accounts
 - Update member information
 - Activate/deactivate member accounts
-- View member borrowing history and active borrows
+- View individual member details including borrowing history and active borrows
+- Search members by username, email, or name
 
 ### Author Management
 - Create, view, update, and delete authors
+- Search authors by name or nationality
 
 ### Book Management
 - Create, view, update, and delete books
 - Archive/unarchive books
-- View all copies of a book
+- Search books by title, author, or ISBN
+- Filter books to show/hide archived books
+- Navigate to view all copies of a specific book
 
 ### Book Copy Management
 - Create, view, update, and delete book copies
 - Mark copies as available, lost, or maintenance
-- Look up copies by barcode
+- Search copies by barcode or book title
+- Filter copies by status (available, borrowed, maintenance, lost)
 
 ### Transaction Management
 - Issue books to members
 - Process book returns
-- View all transactions
-- View overdue transactions
-- Collect fines
-
-### Statistics & Reports
-- View library overview statistics
-- View popular books report
-
-### Configuration
-- View and update library configuration (borrow limits, loan periods, fine rates)
+- View all transactions with filters (all, active, overdue, returned)
+- Collect fines from returned transactions
+- Search transactions by book title, barcode, or member name
 
 ## Allowed Member Actions
 
-Members have limited access focused on browsing and borrowing books:
+Members have limited access focused on browsing books and viewing their account information through the following UI pages:
 
-### Profile Management
-- View their own profile information
-- View their borrowing history
-- View their active borrows
+### Dashboard
+- View welcome message and profile summary
+- View count of active borrows
+- View books due soon (within 3 days)
 
-### Browsing
-- Browse available books in the catalog
-- View book details
-- View author information
+### Browse Books
+- Browse all non-archived books in the catalog
+- View book details (title, author, ISBN, availability status)
+- Search books by title, author, or ISBN
 
-### Borrowing
-- Borrow available books (up to 3 simultaneously)
-- Subject to 14-day loan period
-- Cannot borrow archived books
-- Cannot borrow same title twice concurrently
-- Must be an active member to borrow
+### My Borrows
+- View all currently borrowed books
+- See due dates for each borrowed book
+- View overdue status
 
-**Note:** Members cannot issue or return books themselves - these actions must be performed by librarians.
+### History
+- View complete borrowing history
+- See past transactions and return dates
+
+**Note:** Members cannot borrow or return books themselves. All book transactions (issuing and returning) must be performed by librarians.
+
+### Borrowing Constraints
+
+When librarians issue books to members, the following business rules apply:
+- Members can borrow up to 3 books simultaneously
+- Loan period is 14 days before fines accrue
+- Members cannot borrow archived books
+- Members cannot borrow the same title twice concurrently
+- Members must have an active account to borrow books
 
 ## API Documentation
 
