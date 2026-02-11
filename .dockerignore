@@ -1,0 +1,72 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Docker files
+backend/Dockerfile
+backend/.dockerignore
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.Python
+**/*.so
+**/*.egg
+**/*.egg-info
+**/dist/
+**/build/
+**/*.whl
+**/venv/
+**/env/
+**/ENV/
+
+# Django
+**/*.sqlite3
+**/*.log
+**/db.sqlite3
+**/staticfiles/
+**/media/
+
+# Node
+**/node_modules/
+**/.next/
+**/out/
+
+# Environment files
+.env
+.env.*
+!.env.example
+frontend/.env.local
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+jest-results/
+**/.pytest_cache/
+
+# Misc
+.claude/

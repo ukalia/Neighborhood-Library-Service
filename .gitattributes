@@ -1,0 +1,10 @@
+# Enforce Unix line endings for shell scripts
+*.sh text eol=lf
+
+# Enforce Unix line endings for Docker-related files
+Dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+supervisord.conf text eol=lf
+
+# Auto-detect text files and normalize to LF
+* text=auto eol=lf

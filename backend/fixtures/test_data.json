@@ -1,0 +1,1154 @@
+[
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "username": "librarian1",
+      "email": "librarian1@library.com",
+      "password": "pbkdf2_sha256$1000000$NJ3zBR5haRa9G1jYbKHL8e$WZjM0ZEoJAlXXiO+ZLTSWNig2q/RgbA09FkSdhl/JDI=",
+      "first_name": "Alice",
+      "last_name": "Johnson",
+      "role": "librarian",
+      "phone_number": "555-0101",
+      "address": "123 Library St, Booktown",
+      "is_active": true,
+      "is_staff": true,
+      "is_superuser": false,
+      "date_joined": "2024-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+      "username": "librarian2",
+      "email": "librarian2@library.com",
+      "password": "pbkdf2_sha256$1000000$NJ3zBR5haRa9G1jYbKHL8e$WZjM0ZEoJAlXXiO+ZLTSWNig2q/RgbA09FkSdhl/JDI=",
+      "first_name": "Bob",
+      "last_name": "Smith",
+      "role": "librarian",
+      "phone_number": "555-0102",
+      "address": "456 Book Ave, Booktown",
+      "is_active": true,
+      "is_staff": true,
+      "is_superuser": false,
+      "date_joined": "2024-02-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+      "username": "member1",
+      "email": "member1@example.com",
+      "password": "pbkdf2_sha256$1000000$NJ3zBR5haRa9G1jYbKHL8e$WZjM0ZEoJAlXXiO+ZLTSWNig2q/RgbA09FkSdhl/JDI=",
+      "first_name": "Charlie",
+      "last_name": "Brown",
+      "role": "member",
+      "phone_number": "555-1001",
+      "address": "789 Reader Rd, Booktown",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2024-03-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 4,
+    "fields": {
+      "username": "member2",
+      "email": "member2@example.com",
+      "password": "pbkdf2_sha256$1000000$NJ3zBR5haRa9G1jYbKHL8e$WZjM0ZEoJAlXXiO+ZLTSWNig2q/RgbA09FkSdhl/JDI=",
+      "first_name": "Diana",
+      "last_name": "Prince",
+      "role": "member",
+      "phone_number": "555-1002",
+      "address": "321 Novel Ln, Booktown",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2024-03-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 5,
+    "fields": {
+      "username": "member3",
+      "email": "member3@example.com",
+      "password": "pbkdf2_sha256$1000000$NJ3zBR5haRa9G1jYbKHL8e$WZjM0ZEoJAlXXiO+ZLTSWNig2q/RgbA09FkSdhl/JDI=",
+      "first_name": "Edward",
+      "last_name": "Norton",
+      "role": "member",
+      "phone_number": "555-1003",
+      "address": "654 Story St, Booktown",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2024-04-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 6,
+    "fields": {
+      "username": "member4",
+      "email": "member4@example.com",
+      "password": "pbkdf2_sha256$1000000$NJ3zBR5haRa9G1jYbKHL8e$WZjM0ZEoJAlXXiO+ZLTSWNig2q/RgbA09FkSdhl/JDI=",
+      "first_name": "Fiona",
+      "last_name": "Green",
+      "role": "member",
+      "phone_number": "555-1004",
+      "address": "987 Chapter Ct, Booktown",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2024-04-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 7,
+    "fields": {
+      "username": "member5",
+      "email": "member5@example.com",
+      "password": "pbkdf2_sha256$1000000$NJ3zBR5haRa9G1jYbKHL8e$WZjM0ZEoJAlXXiO+ZLTSWNig2q/RgbA09FkSdhl/JDI=",
+      "first_name": "George",
+      "last_name": "Miller",
+      "role": "member",
+      "phone_number": "555-1005",
+      "address": "147 Prose Pl, Booktown",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "date_joined": "2024-04-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 1,
+    "fields": {
+      "name": "Jane Austen",
+      "nationality": "British",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 2,
+    "fields": {
+      "name": "George Orwell",
+      "nationality": "British",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 3,
+    "fields": {
+      "name": "F. Scott Fitzgerald",
+      "nationality": "American",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 4,
+    "fields": {
+      "name": "Harper Lee",
+      "nationality": "American",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 5,
+    "fields": {
+      "name": "J.K. Rowling",
+      "nationality": "British",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 6,
+    "fields": {
+      "name": "Agatha Christie",
+      "nationality": "British",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 7,
+    "fields": {
+      "name": "J.R.R. Tolkien",
+      "nationality": "British",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 8,
+    "fields": {
+      "name": "Ernest Hemingway",
+      "nationality": "American",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 9,
+    "fields": {
+      "name": "Gabriel García Márquez",
+      "nationality": "Colombian",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.author",
+    "pk": 10,
+    "fields": {
+      "name": "Leo Tolstoy",
+      "nationality": "Russian",
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 1,
+    "fields": {
+      "title": "Pride and Prejudice",
+      "author": 1,
+      "isbn": "9780141439518",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 2,
+    "fields": {
+      "title": "1984",
+      "author": 2,
+      "isbn": "9780451524935",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 3,
+    "fields": {
+      "title": "The Great Gatsby",
+      "author": 3,
+      "isbn": "9780743273565",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 4,
+    "fields": {
+      "title": "To Kill a Mockingbird",
+      "author": 4,
+      "isbn": "9780061120084",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 5,
+    "fields": {
+      "title": "Harry Potter and the Philosopher's Stone",
+      "author": 5,
+      "isbn": "9780747532699",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 6,
+    "fields": {
+      "title": "Murder on the Orient Express",
+      "author": 6,
+      "isbn": "9780062693662",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 7,
+    "fields": {
+      "title": "The Hobbit",
+      "author": 7,
+      "isbn": "9780547928227",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 8,
+    "fields": {
+      "title": "The Old Man and the Sea",
+      "author": 8,
+      "isbn": "9780684801223",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 9,
+    "fields": {
+      "title": "One Hundred Years of Solitude",
+      "author": 9,
+      "isbn": "9780060883287",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.book",
+    "pk": 10,
+    "fields": {
+      "title": "War and Peace",
+      "author": 10,
+      "isbn": "9781400079988",
+      "is_archived": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 1,
+    "fields": {
+      "book": 1,
+      "status": "available",
+      "barcode": "BC001-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 2,
+    "fields": {
+      "book": 1,
+      "status": "available",
+      "barcode": "BC001-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 3,
+    "fields": {
+      "book": 1,
+      "status": "borrowed",
+      "barcode": "BC001-03",
+      "borrowed_by": 3,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2026-02-05T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 4,
+    "fields": {
+      "book": 1,
+      "status": "available",
+      "barcode": "BC001-04",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 5,
+    "fields": {
+      "book": 1,
+      "status": "available",
+      "barcode": "BC001-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 6,
+    "fields": {
+      "book": 2,
+      "status": "available",
+      "barcode": "BC002-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 7,
+    "fields": {
+      "book": 2,
+      "status": "available",
+      "barcode": "BC002-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 8,
+    "fields": {
+      "book": 2,
+      "status": "available",
+      "barcode": "BC002-03",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 9,
+    "fields": {
+      "book": 2,
+      "status": "available",
+      "barcode": "BC002-04",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 10,
+    "fields": {
+      "book": 2,
+      "status": "available",
+      "barcode": "BC002-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 11,
+    "fields": {
+      "book": 3,
+      "status": "available",
+      "barcode": "BC003-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 12,
+    "fields": {
+      "book": 3,
+      "status": "available",
+      "barcode": "BC003-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 13,
+    "fields": {
+      "book": 3,
+      "status": "available",
+      "barcode": "BC003-03",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 14,
+    "fields": {
+      "book": 3,
+      "status": "available",
+      "barcode": "BC003-04",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 15,
+    "fields": {
+      "book": 3,
+      "status": "available",
+      "barcode": "BC003-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 16,
+    "fields": {
+      "book": 4,
+      "status": "available",
+      "barcode": "BC004-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 17,
+    "fields": {
+      "book": 4,
+      "status": "available",
+      "barcode": "BC004-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 18,
+    "fields": {
+      "book": 4,
+      "status": "available",
+      "barcode": "BC004-03",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 19,
+    "fields": {
+      "book": 4,
+      "status": "available",
+      "barcode": "BC004-04",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 20,
+    "fields": {
+      "book": 4,
+      "status": "available",
+      "barcode": "BC004-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 21,
+    "fields": {
+      "book": 5,
+      "status": "available",
+      "barcode": "BC005-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 22,
+    "fields": {
+      "book": 5,
+      "status": "available",
+      "barcode": "BC005-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 23,
+    "fields": {
+      "book": 5,
+      "status": "available",
+      "barcode": "BC005-03",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 24,
+    "fields": {
+      "book": 5,
+      "status": "borrowed",
+      "barcode": "BC005-04",
+      "borrowed_by": 4,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2026-02-06T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 25,
+    "fields": {
+      "book": 5,
+      "status": "available",
+      "barcode": "BC005-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 26,
+    "fields": {
+      "book": 6,
+      "status": "available",
+      "barcode": "BC006-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 27,
+    "fields": {
+      "book": 6,
+      "status": "available",
+      "barcode": "BC006-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 28,
+    "fields": {
+      "book": 6,
+      "status": "available",
+      "barcode": "BC006-03",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 29,
+    "fields": {
+      "book": 6,
+      "status": "available",
+      "barcode": "BC006-04",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 30,
+    "fields": {
+      "book": 6,
+      "status": "available",
+      "barcode": "BC006-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 31,
+    "fields": {
+      "book": 7,
+      "status": "available",
+      "barcode": "BC007-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 32,
+    "fields": {
+      "book": 7,
+      "status": "available",
+      "barcode": "BC007-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 33,
+    "fields": {
+      "book": 7,
+      "status": "available",
+      "barcode": "BC007-03",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 34,
+    "fields": {
+      "book": 7,
+      "status": "available",
+      "barcode": "BC007-04",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 35,
+    "fields": {
+      "book": 7,
+      "status": "available",
+      "barcode": "BC007-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 36,
+    "fields": {
+      "book": 8,
+      "status": "available",
+      "barcode": "BC008-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 37,
+    "fields": {
+      "book": 8,
+      "status": "available",
+      "barcode": "BC008-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 38,
+    "fields": {
+      "book": 8,
+      "status": "available",
+      "barcode": "BC008-03",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 39,
+    "fields": {
+      "book": 8,
+      "status": "available",
+      "barcode": "BC008-04",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 40,
+    "fields": {
+      "book": 8,
+      "status": "available",
+      "barcode": "BC008-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 41,
+    "fields": {
+      "book": 9,
+      "status": "available",
+      "barcode": "BC009-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 42,
+    "fields": {
+      "book": 9,
+      "status": "available",
+      "barcode": "BC009-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 43,
+    "fields": {
+      "book": 9,
+      "status": "available",
+      "barcode": "BC009-03",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 44,
+    "fields": {
+      "book": 9,
+      "status": "available",
+      "barcode": "BC009-04",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 45,
+    "fields": {
+      "book": 9,
+      "status": "available",
+      "barcode": "BC009-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 46,
+    "fields": {
+      "book": 10,
+      "status": "available",
+      "barcode": "BC010-01",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 47,
+    "fields": {
+      "book": 10,
+      "status": "available",
+      "barcode": "BC010-02",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 48,
+    "fields": {
+      "book": 10,
+      "status": "available",
+      "barcode": "BC010-03",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 49,
+    "fields": {
+      "book": 10,
+      "status": "available",
+      "barcode": "BC010-04",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.bookcopy",
+    "pk": 50,
+    "fields": {
+      "book": 10,
+      "status": "available",
+      "barcode": "BC010-05",
+      "borrowed_by": null,
+      "created_at": "2024-01-02T10:00:00Z",
+      "updated_at": "2024-01-02T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 1,
+    "fields": {
+      "book_copy": 1,
+      "borrowed_by": 3,
+      "returned_at": "2024-05-01T10:00:00Z",
+      "fine": null,
+      "fine_collected": false,
+      "created_at": "2024-04-15T10:00:00Z",
+      "updated_at": "2024-05-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 2,
+    "fields": {
+      "book_copy": 6,
+      "borrowed_by": 3,
+      "returned_at": "2024-06-01T10:00:00Z",
+      "fine": "5.00",
+      "fine_collected": true,
+      "created_at": "2024-05-10T10:00:00Z",
+      "updated_at": "2024-06-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 3,
+    "fields": {
+      "book_copy": 3,
+      "borrowed_by": 3,
+      "returned_at": null,
+      "fine": null,
+      "fine_collected": false,
+      "created_at": "2026-02-05T10:00:00Z",
+      "updated_at": "2026-02-05T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 4,
+    "fields": {
+      "book_copy": 11,
+      "borrowed_by": 4,
+      "returned_at": "2024-07-15T10:00:00Z",
+      "fine": null,
+      "fine_collected": false,
+      "created_at": "2024-07-01T10:00:00Z",
+      "updated_at": "2024-07-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 5,
+    "fields": {
+      "book_copy": 16,
+      "borrowed_by": 4,
+      "returned_at": "2024-08-20T10:00:00Z",
+      "fine": "12.00",
+      "fine_collected": false,
+      "created_at": "2024-08-01T10:00:00Z",
+      "updated_at": "2024-08-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 6,
+    "fields": {
+      "book_copy": 24,
+      "borrowed_by": 4,
+      "returned_at": null,
+      "fine": null,
+      "fine_collected": false,
+      "created_at": "2026-02-06T10:00:00Z",
+      "updated_at": "2026-02-06T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 7,
+    "fields": {
+      "book_copy": 21,
+      "borrowed_by": 5,
+      "returned_at": "2024-09-10T10:00:00Z",
+      "fine": "8.00",
+      "fine_collected": true,
+      "created_at": "2024-08-20T10:00:00Z",
+      "updated_at": "2024-09-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 8,
+    "fields": {
+      "book_copy": 26,
+      "borrowed_by": 5,
+      "returned_at": "2024-10-05T10:00:00Z",
+      "fine": null,
+      "fine_collected": false,
+      "created_at": "2024-09-20T10:00:00Z",
+      "updated_at": "2024-10-05T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 9,
+    "fields": {
+      "book_copy": 31,
+      "borrowed_by": 6,
+      "returned_at": "2024-11-01T10:00:00Z",
+      "fine": "15.00",
+      "fine_collected": true,
+      "created_at": "2024-10-05T10:00:00Z",
+      "updated_at": "2024-11-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 10,
+    "fields": {
+      "book_copy": 36,
+      "borrowed_by": 6,
+      "returned_at": "2024-11-20T10:00:00Z",
+      "fine": null,
+      "fine_collected": false,
+      "created_at": "2024-11-05T10:00:00Z",
+      "updated_at": "2024-11-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 11,
+    "fields": {
+      "book_copy": 41,
+      "borrowed_by": 6,
+      "returned_at": "2025-01-10T10:00:00Z",
+      "fine": "20.00",
+      "fine_collected": false,
+      "created_at": "2024-12-10T10:00:00Z",
+      "updated_at": "2025-01-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 12,
+    "fields": {
+      "book_copy": 46,
+      "borrowed_by": 7,
+      "returned_at": "2025-02-01T10:00:00Z",
+      "fine": null,
+      "fine_collected": false,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-02-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 13,
+    "fields": {
+      "book_copy": 12,
+      "borrowed_by": 7,
+      "returned_at": "2025-03-15T10:00:00Z",
+      "fine": "3.00",
+      "fine_collected": true,
+      "created_at": "2025-03-01T10:00:00Z",
+      "updated_at": "2025-03-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 14,
+    "fields": {
+      "book_copy": 17,
+      "borrowed_by": 7,
+      "returned_at": "2025-05-01T10:00:00Z",
+      "fine": "25.00",
+      "fine_collected": false,
+      "created_at": "2025-04-01T10:00:00Z",
+      "updated_at": "2025-05-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.transaction",
+    "pk": 15,
+    "fields": {
+      "book_copy": 22,
+      "borrowed_by": 5,
+      "returned_at": "2025-06-10T10:00:00Z",
+      "fine": null,
+      "fine_collected": false,
+      "created_at": "2025-05-25T10:00:00Z",
+      "updated_at": "2025-06-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "books.libraryconfig",
+    "pk": 1,
+    "fields": {
+      "max_borrow_days_without_fine": 14,
+      "fine_per_day": "1.00",
+      "max_books_per_member": 3,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  }
+]
