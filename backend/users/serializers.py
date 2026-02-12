@@ -1,3 +1,4 @@
+from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from users.models import User
@@ -69,5 +70,5 @@ class MemberSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['role'] = User.MEMBER
         if 'password' not in validated_data:
-            validated_data['password'] = User.objects.make_random_password()
+            validated_data['password'] = get_random_string(12)
         return User.objects.create_user(**validated_data)

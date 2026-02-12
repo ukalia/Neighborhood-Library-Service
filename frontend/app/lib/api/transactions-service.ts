@@ -1,10 +1,12 @@
 import { apiClient } from "@/app/lib/api-client";
+import API_ENDPOINTS, { buildUrl } from "@/app/lib/api/endpoints";
 import type {
   Transaction,
   TransactionQueryParams,
   LibrarianBorrowBookRequest,
   ProcessReturnResponse,
   CollectFineResponse,
+  PaginatedResponse,
 } from "@/app/types/library";
 
 /**
@@ -14,18 +16,27 @@ import type {
 export const getTransactions = async (
   params?: TransactionQueryParams
 ): Promise<Transaction[]> => {
-  const queryString = params
-    ? new URLSearchParams(
-        Object.entries(params)
-          .filter(([, value]) => value !== undefined)
-          .map(([key, value]) => [key, String(value)])
-      ).toString()
-    : "";
+  const response = await apiClient.get<PaginatedResponse<Transaction>>(
+    buildUrl(API_ENDPOINTS.TRANSACTIONS.LIST, params)
+  );
+  return response.results;
+};
 
-  const endpoint = queryString
-    ? `/api/transactions/?${queryString}`
-    : "/api/transactions/";
-  return apiClient.get<Transaction[]>(endpoint);
+/**
+ * Get paginated list of transactions with optional query parameters
+ * Members see only their own transactions, Librarians see all
+ */
+export interface PaginatedTransactionQueryParams extends TransactionQueryParams {
+  page?: number;
+  page_size?: number;
+}
+
+export const getTransactionsPaginated = async (
+  params?: PaginatedTransactionQueryParams
+): Promise<PaginatedResponse<Transaction>> => {
+  return apiClient.get<PaginatedResponse<Transaction>>(
+    buildUrl(API_ENDPOINTS.TRANSACTIONS.LIST, params)
+  );
 };
 
 /**
@@ -33,7 +44,7 @@ export const getTransactions = async (
  * Members can only access their own transactions
  */
 export const getTransactionById = async (id: number): Promise<Transaction> => {
-  return apiClient.get<Transaction>(`/api/transactions/${id}/`);
+  return apiClient.get<Transaction>(API_ENDPOINTS.TRANSACTIONS.DETAIL(id));
 };
 
 /**
@@ -41,7 +52,7 @@ export const getTransactionById = async (id: number): Promise<Transaction> => {
  * Members see only their own overdue transactions, Librarians see all
  */
 export const getOverdueTransactions = async (): Promise<Transaction[]> => {
-  return apiClient.get<Transaction[]>("/api/transactions/overdue/");
+  return apiClient.get<Transaction[]>(API_ENDPOINTS.TRANSACTIONS.OVERDUE);
 };
 
 /**
@@ -50,7 +61,7 @@ export const getOverdueTransactions = async (): Promise<Transaction[]> => {
 export const librarianBorrowBook = async (
   data: LibrarianBorrowBookRequest
 ): Promise<Transaction> => {
-  return apiClient.post<Transaction>("/api/transactions/issue-book/", data);
+  return apiClient.post<Transaction>(API_ENDPOINTS.TRANSACTIONS.ISSUE_BOOK, data);
 };
 
 /**
@@ -61,7 +72,7 @@ export const processReturn = async (
   id: number
 ): Promise<ProcessReturnResponse> => {
   return apiClient.post<ProcessReturnResponse>(
-    `/api/transactions/${id}/process_return/`
+    API_ENDPOINTS.TRANSACTIONS.PROCESS_RETURN(id)
   );
 };
 
@@ -71,6 +82,6 @@ export const processReturn = async (
  */
 export const collectFine = async (id: number): Promise<CollectFineResponse> => {
   return apiClient.post<CollectFineResponse>(
-    `/api/transactions/${id}/collect_fine/`
+    API_ENDPOINTS.TRANSACTIONS.COLLECT_FINE(id)
   );
 };

@@ -19,6 +19,9 @@ done
 echo "Database is ready!"
 cd /app/backend || { echo "Backend directory not found"; exit 1; }
 
+echo "Creating logs directory..."
+mkdir -p logs
+
 echo "Running migrations..."
 python manage.py migrate --noinput
 

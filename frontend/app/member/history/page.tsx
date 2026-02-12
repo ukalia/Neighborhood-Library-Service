@@ -2,45 +2,38 @@
 
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/app/components/layout/DashboardLayout";
-import Table, { Column } from "@/app/components/ui/Table";
+import PaginatedTable, { Column } from "@/app/components/ui/PaginatedTable";
 import Badge from "@/app/components/ui/Badge";
-import { getMyBorrowingHistory } from "@/app/lib/api/members-service";
+import { getMyBorrowingHistoryPaginated } from "@/app/lib/api/members-service";
+import { usePagination } from "@/app/hooks/usePagination";
 import type { Transaction } from "@/app/types/library";
 
 export default function BorrowingHistory() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterOption, setFilterOption] = useState<"all" | "withFines">("all");
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const data = await getMyBorrowingHistory();
-        setTransactions(data);
-        setFilteredTransactions(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load borrowing history");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHistory();
-  }, []);
+  const {
+    data: transactions,
+    loading,
+    error: paginationError,
+    pagination,
+    setPage,
+    setPageSize,
+  } = usePagination<Transaction>({
+    fetchFunction: getMyBorrowingHistoryPaginated,
+    queryParams: {},
+  });
 
   useEffect(() => {
-    if (filterOption === "all") {
-      setFilteredTransactions(transactions);
-    } else {
-      setFilteredTransactions(
-        transactions.filter((t) => t.fine && parseFloat(t.fine) > 0)
-      );
+    if (paginationError) {
+      setError(paginationError.message || "Failed to load borrowing history");
     }
-  }, [filterOption, transactions]);
+  }, [paginationError]);
+
+  const filteredTransactions =
+    filterOption === "all"
+      ? transactions
+      : transactions.filter((t) => t.fine && parseFloat(t.fine) > 0);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Not returned";
@@ -56,24 +49,21 @@ export default function BorrowingHistory() {
     {
       key: "book_title",
       header: "Book Title",
-      sortable: true,
+      render: (transaction) => transaction.book_title,
     },
     {
       key: "created_at",
       header: "Borrowed Date",
-      sortable: true,
       render: (transaction) => formatDate(transaction.created_at),
     },
     {
       key: "returned_at",
       header: "Returned Date",
-      sortable: true,
       render: (transaction) => formatDate(transaction.returned_at),
     },
     {
       key: "days_borrowed",
       header: "Days Borrowed",
-      sortable: true,
       render: (transaction) => (
         <span className={transaction.is_overdue ? "text-red-600 font-semibold" : ""}>
           {transaction.days_borrowed}
@@ -83,7 +73,6 @@ export default function BorrowingHistory() {
     {
       key: "fine",
       header: "Fine Amount",
-      sortable: true,
       render: (transaction) => {
         if (!transaction.fine || parseFloat(transaction.fine) === 0) {
           return <span className="text-gray-400">-</span>;
@@ -119,6 +108,12 @@ export default function BorrowingHistory() {
         )}
 
         <div className="bg-surface shadow-card rounded-lg p-4">
+          {filterOption === "withFines" && (
+            <div className="mb-4 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm">
+              Showing transactions with fines on current page. Navigate through pages to see all transactions with fines.
+            </div>
+          )}
+
           <div className="flex items-center gap-4 mb-4">
             <span className="text-sm font-medium text-gray-700">Filter:</span>
             <div className="flex gap-2">
@@ -130,7 +125,7 @@ export default function BorrowingHistory() {
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                Show All ({transactions.length})
+                Show All
               </button>
               <button
                 onClick={() => setFilterOption("withFines")}
@@ -140,19 +135,20 @@ export default function BorrowingHistory() {
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                Only With Fines (
-                {transactions.filter((t) => t.fine && parseFloat(t.fine) > 0).length})
+                Only With Fines
               </button>
             </div>
           </div>
 
-          <Table
+          <PaginatedTable
             columns={columns}
             data={filteredTransactions}
             keyExtractor={(transaction) => transaction.id}
             loading={loading}
             emptyMessage="No borrowing history"
-            pageSize={10}
+            pagination={pagination}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
           />
         </div>
       </div>

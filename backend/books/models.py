@@ -82,6 +82,11 @@ class Transaction(BaseModel):
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
         related_name='borrowed_book_copies'
     )
+    issued_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+        related_name='issued_transactions',
+        null=True, blank=True
+    )
     returned_at = models.DateTimeField(null=True, blank=True)
     fine = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     fine_collected = models.BooleanField(default=False)

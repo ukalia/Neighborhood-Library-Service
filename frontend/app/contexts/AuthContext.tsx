@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { apiClient } from "@/app/lib/api-client";
+import API_ENDPOINTS from "@/app/lib/api/endpoints";
 import { setAuthCookies, clearAuthCookies } from "@/app/lib/auth-cookies";
 import { getTokenExpirationTime } from "@/app/lib/jwt-utils";
 import type {
@@ -66,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const response = await apiClient.post<RefreshTokenResponse>(
-        "/api/auth/refresh/",
+        API_ENDPOINTS.AUTH.REFRESH,
         { refresh: currentAuthState.refreshToken },
         { requiresAuth: false }
       );
@@ -93,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (currentRefreshToken) {
       try {
         await apiClient.post<LogoutResponse>(
-          "/api/auth/logout/",
+          API_ENDPOINTS.AUTH.LOGOUT,
           { refresh: currentRefreshToken },
           { requiresAuth: true }
         );
@@ -107,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (credentials: LoginRequest) => {
       try {
         const response = await apiClient.post<LoginResponse>(
-          "/api/auth/login/",
+          API_ENDPOINTS.AUTH.LOGIN,
           credentials,
           { requiresAuth: false }
         );

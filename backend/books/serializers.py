@@ -11,33 +11,24 @@ User = get_user_model()
 
 
 class AuthorSerializer(serializers.ModelSerializer):
-    books_count = serializers.SerializerMethodField()
+    books_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Author
         fields = ('id', 'name', 'nationality', 'books_count', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
 
-    def get_books_count(self, obj):
-        return obj.books.count()
-
 
 class BookSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source='author.name', read_only=True)
-    total_copies = serializers.SerializerMethodField()
-    available_copies = serializers.SerializerMethodField()
+    total_copies = serializers.IntegerField(read_only=True)
+    available_copies = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Book
         fields = ('id', 'title', 'author', 'author_name', 'isbn', 'is_archived',
                   'total_copies', 'available_copies', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
-
-    def get_total_copies(self, obj):
-        return obj.copies.count()
-
-    def get_available_copies(self, obj):
-        return obj.copies.filter(status=BookCopy.AVAILABLE).count()
 
 
 class BookCopyListSerializer(serializers.ModelSerializer):
@@ -92,6 +83,7 @@ class BookCopySerializer(serializers.ModelSerializer):
 class TransactionSerializer(serializers.ModelSerializer):
     book_title = serializers.CharField(source='book_copy.book.title', read_only=True)
     borrower_name = serializers.CharField(source='borrowed_by.username', read_only=True)
+    issued_by_name = serializers.CharField(source='issued_by.username', read_only=True, allow_null=True)
     barcode = serializers.CharField(source='book_copy.barcode', read_only=True)
     days_borrowed = serializers.SerializerMethodField()
     is_overdue = serializers.SerializerMethodField()
@@ -100,8 +92,9 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ('id', 'book_copy', 'book_title', 'barcode', 'borrowed_by',
-                  'borrower_name', 'created_at', 'returned_at', 'fine',
-                  'fine_collected', 'days_borrowed', 'is_overdue', 'due_date', 'updated_at')
+                  'borrower_name', 'issued_by', 'issued_by_name', 'created_at',
+                  'returned_at', 'fine', 'fine_collected', 'days_borrowed',
+                  'is_overdue', 'due_date', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
 
     def get_days_borrowed(self, obj):

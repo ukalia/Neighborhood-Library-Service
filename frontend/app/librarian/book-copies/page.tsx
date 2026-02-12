@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/app/components/layout/DashboardLayout";
-import Table from "@/app/components/ui/Table";
+import PaginatedTable, { Column } from "@/app/components/ui/PaginatedTable";
 import Button from "@/app/components/ui/Button";
 import Modal from "@/app/components/ui/Modal";
 import Input from "@/app/components/ui/Input";
@@ -11,9 +11,8 @@ import Select from "@/app/components/ui/Select";
 import SearchBar from "@/app/components/ui/SearchBar";
 import Badge from "@/app/components/ui/Badge";
 import Alert from "@/app/components/ui/Alert";
-import LoadingSpinner from "@/app/components/ui/LoadingSpinner";
 import {
-  getBookCopies,
+  getBookCopiesPaginated,
   createBookCopy,
   updateBookCopy,
   markAvailable,
@@ -21,20 +20,35 @@ import {
   markLost,
 } from "@/app/lib/api/book-copies-service";
 import { getBooks } from "@/app/lib/api/books-service";
+import { usePagination } from "@/app/hooks/usePagination";
 import type { BookCopy, Book, BookCopyStatus } from "@/app/types/library";
 
 export default function BookCopiesPage() {
   const searchParams = useSearchParams();
   const bookIdParam = searchParams.get("book");
 
-  const [bookCopies, setBookCopies] = useState<BookCopy[]>([]);
-  const [filteredCopies, setFilteredCopies] = useState<BookCopy[]>([]);
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookCopyStatus | "all">("all");
+  const [books, setBooks] = useState<Book[]>([]);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const {
+    data: bookCopies,
+    loading,
+    error: paginationError,
+    pagination,
+    setPage,
+    setPageSize,
+    refresh,
+  } = usePagination<BookCopy>({
+    fetchFunction: getBookCopiesPaginated,
+    queryParams: {
+      ...(searchQuery ? { search: searchQuery } : {}),
+      ...(statusFilter !== "all" ? { status: statusFilter } : {}),
+      ...(bookIdParam ? { book: parseInt(bookIdParam) } : {}),
+    },
+  });
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -53,49 +67,29 @@ export default function BookCopiesPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchData();
-  }, [bookIdParam]);
+    const fetchBooks = async () => {
+      try {
+        const booksData = await getBooks();
+        setBooks(booksData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load books");
+      }
+    };
+    fetchBooks();
+  }, []);
 
   useEffect(() => {
-    applyFilters();
-  }, [searchQuery, statusFilter, bookCopies]);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const bookId = bookIdParam ? parseInt(bookIdParam) : undefined;
-      const [copiesData, booksData] = await Promise.all([
-        getBookCopies(bookId ? { book: bookId } : undefined),
-        getBooks(),
-      ]);
-      setBookCopies(copiesData);
-      setBooks(booksData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
-    } finally {
-      setLoading(false);
+    if (success) {
+      const timer = setTimeout(() => setSuccess(""), 3000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [success]);
 
-  const applyFilters = useCallback(() => {
-    let filtered = [...bookCopies];
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (copy) =>
-          copy.barcode.toLowerCase().includes(query) ||
-          copy.book_title.toLowerCase().includes(query)
-      );
+  useEffect(() => {
+    if (paginationError) {
+      setError(paginationError.message || "Failed to load book copies");
     }
-
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((copy) => copy.status === statusFilter);
-    }
-
-    setFilteredCopies(filtered);
-  }, [searchQuery, statusFilter, bookCopies]);
+  }, [paginationError]);
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
@@ -150,8 +144,7 @@ export default function BookCopiesPage() {
         barcode: "",
         status: "available",
       });
-      await fetchData();
-      setTimeout(() => setSuccess(""), 3000);
+      refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create book copy");
     } finally {
@@ -176,8 +169,7 @@ export default function BookCopiesPage() {
       setSuccess("Book copy updated successfully");
       setShowEditModal(false);
       setEditingCopy(null);
-      await fetchData();
-      setTimeout(() => setSuccess(""), 3000);
+      refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update book copy");
     } finally {
@@ -232,8 +224,7 @@ export default function BookCopiesPage() {
         await markLost(copyId);
         setSuccess("Book copy marked as lost");
       }
-      await fetchData();
-      setTimeout(() => setSuccess(""), 3000);
+      refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update status");
     }
@@ -254,26 +245,24 @@ export default function BookCopiesPage() {
     }
   };
 
-  const columns = [
+  const columns: Column<BookCopy>[] = [
     {
       key: "barcode",
       header: "Barcode",
-      render: (copy: BookCopy) => <span className="font-mono">{copy.barcode}</span>,
+      render: (copy) => <span className="font-mono">{copy.barcode}</span>,
     },
     {
       key: "book_title",
       header: "Book Title",
-      render: (copy: BookCopy) => copy.book_title,
     },
     {
       key: "book_author",
       header: "Author",
-      render: (copy: BookCopy) => copy.book_author,
     },
     {
       key: "status",
       header: "Status",
-      render: (copy: BookCopy) => (
+      render: (copy) => (
         <Badge variant={getStatusBadgeVariant(copy.status)}>
           {copy.status.charAt(0).toUpperCase() + copy.status.slice(1)}
         </Badge>
@@ -282,12 +271,12 @@ export default function BookCopiesPage() {
     {
       key: "borrower_name",
       header: "Borrowed By",
-      render: (copy: BookCopy) => copy.borrower_name || "-",
+      render: (copy) => copy.borrower_name || "-",
     },
     {
       key: "actions",
       header: "Actions",
-      render: (copy: BookCopy) => (
+      render: (copy) => (
         <div className="flex gap-2">
           <Button
             variant="secondary"
@@ -332,14 +321,6 @@ export default function BookCopiesPage() {
     },
   ];
 
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <LoadingSpinner text="Loading book copies..." />
-      </DashboardLayout>
-    );
-  }
-
   const filteredBook = bookIdParam ? books.find(b => b.id === parseInt(bookIdParam)) : null;
 
   return (
@@ -360,13 +341,13 @@ export default function BookCopiesPage() {
         </div>
 
         {error && (
-          <Alert variant="error" onDismiss={() => setError("")}>
+          <Alert variant="error" dismissible onDismiss={() => setError("")}>
             {error}
           </Alert>
         )}
 
         {success && (
-          <Alert variant="success" onDismiss={() => setSuccess("")}>
+          <Alert variant="success" dismissible onDismiss={() => setSuccess("")}>
             {success}
           </Alert>
         )}
@@ -394,17 +375,20 @@ export default function BookCopiesPage() {
           </div>
         </div>
 
-        {filteredCopies.length === 0 ? (
-          <div className="text-center py-12 bg-surface rounded-lg">
-            <p className="text-text-secondary text-lg">
-              {searchQuery || statusFilter !== "all"
-                ? "No book copies found matching your filters"
-                : "No book copies available"}
-            </p>
-          </div>
-        ) : (
-          <Table columns={columns} data={filteredCopies} keyExtractor={(copy) => copy.id} />
-        )}
+        <PaginatedTable
+          columns={columns}
+          data={bookCopies}
+          keyExtractor={(copy) => copy.id.toString()}
+          loading={loading}
+          emptyMessage={
+            searchQuery || statusFilter !== "all"
+              ? "No book copies found matching your filters"
+              : "No book copies available"
+          }
+          pagination={pagination}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       </div>
 
       <Modal

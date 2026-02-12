@@ -148,6 +148,11 @@ class MemberViewSet(viewsets.ModelViewSet):
             borrowed_by=member
         ).select_related('book_copy__book').order_by('-created_at')
 
+        page = self.paginate_queryset(transactions)
+        if page is not None:
+            serializer = TransactionSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = TransactionSerializer(transactions, many=True)
         return Response(serializer.data)
 

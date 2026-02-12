@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/app/contexts/AuthContext";
+import RootErrorBoundary from "@/app/components/errors/RootErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,9 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-background min-h-screen`}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <RootErrorBoundary>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </RootErrorBoundary>
       </body>
     </html>
   );
