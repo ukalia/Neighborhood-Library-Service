@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/app/components/layout/DashboardLayout";
 import SearchBar from "@/app/components/ui/SearchBar";
-import Table, { Column } from "@/app/components/ui/Table";
+import PaginatedTable, { Column } from "@/app/components/ui/PaginatedTable";
 import Button from "@/app/components/ui/Button";
 import Modal from "@/app/components/ui/Modal";
 import Input from "@/app/components/ui/Input";
@@ -12,7 +12,7 @@ import Select from "@/app/components/ui/Select";
 import Alert from "@/app/components/ui/Alert";
 import Badge from "@/app/components/ui/Badge";
 import {
-  getBooks,
+  getBooksPaginated,
   createBook,
   updateBook,
   deleteBook,
@@ -20,18 +20,32 @@ import {
   unarchiveBook,
 } from "@/app/lib/api/books-service";
 import { getAuthors } from "@/app/lib/api/authors-service";
+import { usePagination } from "@/app/hooks/usePagination";
 import type { Book, Author, CreateBookRequest } from "@/app/types/library";
 
 export default function BooksManagementPage() {
   const router = useRouter();
-  const [books, setBooks] = useState<Book[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [authors, setAuthors] = useState<Author[]>([]);
-  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showArchived, setShowArchived] = useState(false);
+
+  const {
+    data: books,
+    loading,
+    error: paginationError,
+    pagination,
+    setPage,
+    setPageSize,
+    refresh,
+  } = usePagination<Book>({
+    fetchFunction: getBooksPaginated,
+    queryParams: {
+      ...(searchQuery ? { search: searchQuery } : {}),
+      include_archived: showArchived,
+    },
+  });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -51,8 +65,16 @@ export default function BooksManagementPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchData();
-  }, [showArchived]);
+    const fetchAuthors = async () => {
+      try {
+        const authorsData = await getAuthors();
+        setAuthors(authorsData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load authors");
+      }
+    };
+    fetchAuthors();
+  }, []);
 
   useEffect(() => {
     if (success) {
@@ -61,36 +83,14 @@ export default function BooksManagementPage() {
     }
   }, [success]);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const params = showArchived ? { include_archived: true } : undefined;
-      const [booksData, authorsData] = await Promise.all([
-        getBooks(params),
-        getAuthors(),
-      ]);
-      setBooks(booksData);
-      setFilteredBooks(booksData);
-      setAuthors(authorsData);
-      setError("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (paginationError) {
+      setError(paginationError.message || "Failed to load books");
     }
-  };
+  }, [paginationError]);
 
   const handleSearch = (value: string) => {
-    setSearchLoading(true);
-    const searchTerm = value.toLowerCase();
-    const filtered = books.filter(
-      (book) =>
-        book.title.toLowerCase().includes(searchTerm) ||
-        book.author_name.toLowerCase().includes(searchTerm) ||
-        book.isbn.toLowerCase().includes(searchTerm)
-    );
-    setFilteredBooks(filtered);
-    setSearchLoading(false);
+    setSearchQuery(value);
   };
 
   const validateForm = (): boolean => {
@@ -127,7 +127,7 @@ export default function BooksManagementPage() {
       setSuccess("Book created successfully");
       setIsCreateModalOpen(false);
       resetForm();
-      fetchData();
+      refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create book");
     } finally {
@@ -144,7 +144,7 @@ export default function BooksManagementPage() {
       setSuccess("Book updated successfully");
       setIsEditModalOpen(false);
       resetForm();
-      fetchData();
+      refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update book");
     } finally {
@@ -161,7 +161,7 @@ export default function BooksManagementPage() {
       setSuccess("Book deleted successfully");
       setIsDeleteModalOpen(false);
       resetForm();
-      fetchData();
+      refresh();
     } catch (err) {
       setError(
         err instanceof Error
@@ -182,7 +182,7 @@ export default function BooksManagementPage() {
         await archiveBook(book.id);
         setSuccess("Book archived successfully");
       }
-      fetchData();
+      refresh();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to update book status"
@@ -318,7 +318,7 @@ export default function BooksManagementPage() {
           <SearchBar
             placeholder="Search by title, author, or ISBN..."
             onSearch={handleSearch}
-            loading={searchLoading}
+            loading={loading}
             className="w-full sm:flex-1"
           />
 
@@ -331,12 +331,15 @@ export default function BooksManagementPage() {
           </Button>
         </div>
 
-        <Table
+        <PaginatedTable
           columns={columns}
-          data={filteredBooks}
+          data={books}
           keyExtractor={(book) => book.id.toString()}
           loading={loading}
           emptyMessage="No books found"
+          pagination={pagination}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
         />
       </div>
 

@@ -1,4 +1,5 @@
 import { apiClient } from "@/app/lib/api-client";
+import API_ENDPOINTS, { buildUrl } from "@/app/lib/api/endpoints";
 import type {
   BookCopy,
   BookCopyQueryParams,
@@ -7,6 +8,7 @@ import type {
   MarkMaintenanceResponse,
   MarkAvailableResponse,
   MarkLostResponse,
+  PaginatedResponse,
 } from "@/app/types/library";
 
 /**
@@ -15,25 +17,33 @@ import type {
 export const getBookCopies = async (
   params?: BookCopyQueryParams
 ): Promise<BookCopy[]> => {
-  const queryString = params
-    ? new URLSearchParams(
-        Object.entries(params)
-          .filter(([, value]) => value !== undefined)
-          .map(([key, value]) => [key, String(value)])
-      ).toString()
-    : "";
+  const response = await apiClient.get<PaginatedResponse<BookCopy>>(
+    buildUrl(API_ENDPOINTS.BOOK_COPIES.LIST, params)
+  );
+  return response.results;
+};
 
-  const endpoint = queryString
-    ? `/api/book-copies/?${queryString}`
-    : "/api/book-copies/";
-  return apiClient.get<BookCopy[]>(endpoint);
+/**
+ * Get paginated list of book copies with optional query parameters (Librarian only)
+ */
+export interface PaginatedBookCopyQueryParams extends BookCopyQueryParams {
+  page?: number;
+  page_size?: number;
+}
+
+export const getBookCopiesPaginated = async (
+  params?: PaginatedBookCopyQueryParams
+): Promise<PaginatedResponse<BookCopy>> => {
+  return apiClient.get<PaginatedResponse<BookCopy>>(
+    buildUrl(API_ENDPOINTS.BOOK_COPIES.LIST, params)
+  );
 };
 
 /**
  * Get a single book copy by ID (Librarian only)
  */
 export const getBookCopyById = async (id: number): Promise<BookCopy> => {
-  return apiClient.get<BookCopy>(`/api/book-copies/${id}/`);
+  return apiClient.get<BookCopy>(API_ENDPOINTS.BOOK_COPIES.DETAIL(id));
 };
 
 /**
@@ -42,7 +52,7 @@ export const getBookCopyById = async (id: number): Promise<BookCopy> => {
 export const createBookCopy = async (
   data: CreateBookCopyRequest
 ): Promise<BookCopy> => {
-  return apiClient.post<BookCopy>("/api/book-copies/", data);
+  return apiClient.post<BookCopy>(API_ENDPOINTS.BOOK_COPIES.LIST, data);
 };
 
 /**
@@ -52,14 +62,16 @@ export const updateBookCopy = async (
   id: number,
   data: UpdateBookCopyRequest
 ): Promise<BookCopy> => {
-  return apiClient.patch<BookCopy>(`/api/book-copies/${id}/`, data);
+  return apiClient.patch<BookCopy>(API_ENDPOINTS.BOOK_COPIES.DETAIL(id), data);
 };
 
 /**
  * Get book copy by barcode (Librarian only)
  */
 export const getBookCopyByBarcode = async (barcode: string): Promise<BookCopy> => {
-  return apiClient.get<BookCopy>(`/api/book-copies/by_barcode/?barcode=${barcode}`);
+  return apiClient.get<BookCopy>(
+    buildUrl(API_ENDPOINTS.BOOK_COPIES.BY_BARCODE, { barcode })
+  );
 };
 
 /**
@@ -70,7 +82,7 @@ export const markMaintenance = async (
   id: number
 ): Promise<MarkMaintenanceResponse> => {
   return apiClient.post<MarkMaintenanceResponse>(
-    `/api/book-copies/${id}/mark_maintenance/`
+    API_ENDPOINTS.BOOK_COPIES.MARK_MAINTENANCE(id)
   );
 };
 
@@ -81,7 +93,7 @@ export const markAvailable = async (
   id: number
 ): Promise<MarkAvailableResponse> => {
   return apiClient.post<MarkAvailableResponse>(
-    `/api/book-copies/${id}/mark_available/`
+    API_ENDPOINTS.BOOK_COPIES.MARK_AVAILABLE(id)
   );
 };
 
@@ -89,5 +101,5 @@ export const markAvailable = async (
  * Mark book copy as lost (Librarian only)
  */
 export const markLost = async (id: number): Promise<MarkLostResponse> => {
-  return apiClient.post<MarkLostResponse>(`/api/book-copies/${id}/mark_lost/`);
+  return apiClient.post<MarkLostResponse>(API_ENDPOINTS.BOOK_COPIES.MARK_LOST(id));
 };

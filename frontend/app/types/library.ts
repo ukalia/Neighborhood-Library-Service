@@ -227,24 +227,28 @@ export interface BookQueryParams {
   is_archived?: boolean;
   include_archived?: boolean;
   ordering?: "title" | "created_at" | "-title" | "-created_at";
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface AuthorQueryParams {
   search?: string;
   nationality?: string;
   ordering?: "name" | "created_at";
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface MemberQueryParams {
   search?: string;
   is_active?: boolean;
   ordering?: string;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface BookCopyQueryParams {
   search?: string;
   status?: BookCopyStatus;
   book?: number;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface TransactionQueryParams {
@@ -253,4 +257,22 @@ export interface TransactionQueryParams {
   fine_collected?: boolean;
   active_only?: boolean;
   overdue_only?: boolean;
+  [key: string]: string | number | boolean | undefined;
+}
+
+// Pagination Types
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+export interface PaginationMeta {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalCount: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }

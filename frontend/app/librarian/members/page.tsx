@@ -4,19 +4,19 @@ import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "@/app/components/layout/DashboardLayout";
 import SearchBar from "@/app/components/ui/SearchBar";
 import Button from "@/app/components/ui/Button";
-import Table, { Column } from "@/app/components/ui/Table";
+import PaginatedTable, { Column } from "@/app/components/ui/PaginatedTable";
 import Modal from "@/app/components/ui/Modal";
 import Input from "@/app/components/ui/Input";
 import Alert from "@/app/components/ui/Alert";
 import Badge from "@/app/components/ui/Badge";
-import LoadingSpinner from "@/app/components/ui/LoadingSpinner";
 import {
-  getMembers,
+  getMembersPaginated,
   createMember,
   updateMember,
   activateMember,
   deactivateMember,
 } from "@/app/lib/api/members-service";
+import { usePagination } from "@/app/hooks/usePagination";
 import type { Member, CreateMemberRequest, UpdateMemberRequest } from "@/app/types/library";
 import { useRouter } from "next/navigation";
 
@@ -24,13 +24,26 @@ type FilterStatus = "all" | "active" | "inactive";
 
 export default function MembersPage() {
   const router = useRouter();
-  const [members, setMembers] = useState<Member[]>([]);
-  const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  const {
+    data: members,
+    loading,
+    error: paginationError,
+    pagination,
+    setPage,
+    setPageSize,
+    refresh,
+  } = usePagination<Member>({
+    fetchFunction: getMembersPaginated,
+    queryParams: {
+      ...(searchQuery ? { search: searchQuery } : {}),
+      ...(filterStatus !== "all" ? { is_active: filterStatus === "active" } : {}),
+    },
+  });
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -46,49 +59,14 @@ export default function MembersPage() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchMembers = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const data = await getMembers();
-      setMembers(data);
-      setFilteredMembers(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch members");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchMembers();
-  }, []);
-
-  useEffect(() => {
-    let filtered = members;
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (member) =>
-          member.username.toLowerCase().includes(term) ||
-          member.email.toLowerCase().includes(term) ||
-          member.first_name.toLowerCase().includes(term) ||
-          member.last_name.toLowerCase().includes(term)
-      );
+    if (paginationError) {
+      setError(paginationError.message || "Failed to load members");
     }
-
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((member) =>
-        filterStatus === "active" ? member.is_active : !member.is_active
-      );
-    }
-
-    setFilteredMembers(filtered);
-  }, [members, searchTerm, filterStatus]);
+  }, [paginationError]);
 
   const handleSearch = useCallback((value: string) => {
-    setSearchTerm(value);
+    setSearchQuery(value);
   }, []);
 
   const validateForm = (): boolean => {
@@ -129,7 +107,7 @@ export default function MembersPage() {
       setSuccessMessage("Member registered successfully");
       setIsCreateModalOpen(false);
       resetForm();
-      await fetchMembers();
+      refresh();
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to register member");
@@ -157,7 +135,7 @@ export default function MembersPage() {
       setIsEditModalOpen(false);
       setSelectedMember(null);
       resetForm();
-      await fetchMembers();
+      refresh();
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update member");
@@ -171,7 +149,7 @@ export default function MembersPage() {
       setError("");
       await activateMember(member.id);
       setSuccessMessage(`Member ${member.username} activated successfully`);
-      await fetchMembers();
+      refresh();
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to activate member");
@@ -188,7 +166,7 @@ export default function MembersPage() {
       setError("");
       await deactivateMember(member.id);
       setSuccessMessage(`Member ${member.username} deactivated successfully`);
-      await fetchMembers();
+      refresh();
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to deactivate member");
@@ -301,14 +279,6 @@ export default function MembersPage() {
     },
   ];
 
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <LoadingSpinner text="Loading members..." />
-      </DashboardLayout>
-    );
-  }
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -361,11 +331,15 @@ export default function MembersPage() {
           </div>
         </div>
 
-        <Table
+        <PaginatedTable
           columns={columns}
-          data={filteredMembers}
+          data={members}
           keyExtractor={(member) => member.id}
+          loading={loading}
           emptyMessage="No members found"
+          pagination={pagination}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
         />
 
         <Modal

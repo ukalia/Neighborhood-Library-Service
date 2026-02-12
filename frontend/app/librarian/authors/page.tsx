@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/app/components/layout/DashboardLayout";
 import SearchBar from "@/app/components/ui/SearchBar";
-import Table, { Column } from "@/app/components/ui/Table";
+import PaginatedTable, { Column } from "@/app/components/ui/PaginatedTable";
 import Button from "@/app/components/ui/Button";
 import Modal from "@/app/components/ui/Modal";
 import Input from "@/app/components/ui/Input";
 import Alert from "@/app/components/ui/Alert";
-import LoadingSpinner from "@/app/components/ui/LoadingSpinner";
 import {
-  getAuthors,
+  getAuthorsPaginated,
   createAuthor,
   updateAuthor,
   deleteAuthor,
 } from "@/app/lib/api/authors-service";
+import { usePagination } from "@/app/hooks/usePagination";
 import type { Author, CreateAuthorRequest } from "@/app/types/library";
 
 interface FormData {
@@ -28,10 +28,20 @@ interface FormErrors {
 }
 
 export default function AuthorsPage() {
-  const [authors, setAuthors] = useState<Author[]>([]);
-  const [filteredAuthors, setFilteredAuthors] = useState<Author[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const {
+    data: authors,
+    loading,
+    error,
+    pagination,
+    setPage,
+    setPageSize,
+    refresh,
+  } = usePagination<Author>({
+    fetchFunction: getAuthorsPaginated,
+    queryParams: searchQuery ? { search: searchQuery } : {},
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
@@ -55,14 +65,6 @@ export default function AuthorsPage() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    fetchAuthors();
-  }, []);
-
-  useEffect(() => {
-    filterAuthors();
-  }, [searchQuery, authors]);
-
-  useEffect(() => {
     if (alert) {
       const timer = setTimeout(() => {
         setAlert(null);
@@ -71,36 +73,14 @@ export default function AuthorsPage() {
     }
   }, [alert]);
 
-  const fetchAuthors = async () => {
-    try {
-      setLoading(true);
-      const data = await getAuthors();
-      setAuthors(data);
-      setFilteredAuthors(data);
-    } catch (error) {
+  useEffect(() => {
+    if (error) {
       setAlert({
-        message: error instanceof Error ? error.message : "Failed to load authors",
+        message: error.message || "Failed to load authors",
         variant: "error",
       });
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const filterAuthors = useCallback(() => {
-    if (!searchQuery.trim()) {
-      setFilteredAuthors(authors);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    const filtered = authors.filter(
-      (author) =>
-        author.name.toLowerCase().includes(query) ||
-        author.nationality.toLowerCase().includes(query)
-    );
-    setFilteredAuthors(filtered);
-  }, [searchQuery, authors]);
+  }, [error]);
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
@@ -176,7 +156,7 @@ export default function AuthorsPage() {
         });
       }
 
-      await fetchAuthors();
+      refresh();
       closeModal();
     } catch (error) {
       setAlert({
@@ -204,7 +184,7 @@ export default function AuthorsPage() {
         message: "Author deleted successfully",
         variant: "success",
       });
-      await fetchAuthors();
+      refresh();
       setDeleteConfirmModal({ isOpen: false, author: null });
     } catch (error) {
       const errorMessage =
@@ -264,14 +244,6 @@ export default function AuthorsPage() {
     },
   ];
 
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <LoadingSpinner text="Loading authors..." />
-      </DashboardLayout>
-    );
-  }
-
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
@@ -303,13 +275,15 @@ export default function AuthorsPage() {
           <Button onClick={openCreateModal}>Add New Author</Button>
         </div>
 
-        <Table
+        <PaginatedTable
           columns={columns}
-          data={filteredAuthors}
+          data={authors}
           keyExtractor={(author) => author.id}
-          loading={false}
+          loading={loading}
           emptyMessage="No authors found"
-          pageSize={10}
+          pagination={pagination}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
         />
       </div>
 

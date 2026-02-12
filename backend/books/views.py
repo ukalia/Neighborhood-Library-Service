@@ -1,10 +1,10 @@
+import logging
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
 from django.utils import timezone
-from django.db import transaction
 from datetime import timedelta
 from decimal import Decimal
 
@@ -19,9 +19,19 @@ from books.serializers import (
     LibraryConfigSerializer,
     BorrowRequestSerializer
 )
+from books.services import (
+    TransactionService,
+    BookCopyService,
+    BookNotAvailableException,
+    BorrowLimitExceededException,
+    DuplicateBorrowException,
+    BookAlreadyReturnedException,
+    MemberInactiveException
+)
 from users.permissions import IsLibrarian, IsLibrarianOrMemberReadOnly
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -29,13 +39,17 @@ class AuthorViewSet(viewsets.ModelViewSet):
     ViewSet for managing authors.
     Librarians can perform full CRUD operations on authors.
     """
-    queryset = Author.objects.all()
     serializer_class = AuthorSerializer
     permission_classes = [IsLibrarian]
     filterset_fields = ['nationality']
     search_fields = ['name', 'nationality']
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
+
+    def get_queryset(self):
+        return Author.objects.annotate(
+            books_count=Count('books')
+        )
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -53,7 +67,13 @@ class BookViewSet(viewsets.ModelViewSet):
     ordering = ['title']
 
     def get_queryset(self):
-        queryset = Book.objects.select_related('author').all()
+        queryset = Book.objects.select_related('author').annotate(
+            total_copies=Count('copies'),
+            available_copies=Count(
+                'copies',
+                filter=Q(copies__status=BookCopy.AVAILABLE)
+            )
+        )
         if self.action == 'unarchive':
             return queryset
         if not self.request.query_params.get('include_archived', False):
@@ -107,33 +127,38 @@ class BookCopyViewSet(viewsets.ModelViewSet):
         """Mark a copy as out for maintenance"""
         copy = self.get_object()
 
-        if copy.status == BookCopy.BORROWED:
-            return Response(
-                {'error': 'Cannot mark borrowed copy as maintenance'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        copy.status = BookCopy.MAINTENANCE
-        copy.borrowed_by = None
-        copy.save()
-        return Response({'status': 'marked for maintenance'}, status=status.HTTP_200_OK)
+        try:
+            BookCopyService.mark_as_maintenance(copy)
+            return Response({'status': 'marked for maintenance'}, status=status.HTTP_200_OK)
+        except BookNotAvailableException as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Unexpected error marking copy as maintenance", exc_info=True)
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'])
     def mark_available(self, request, pk=None):
         """Mark a copy as available (from maintenance)"""
         copy = self.get_object()
-        copy.status = BookCopy.AVAILABLE
-        copy.borrowed_by = None
-        copy.save()
-        return Response({'status': 'marked as available'}, status=status.HTTP_200_OK)
+
+        try:
+            BookCopyService.mark_as_available(copy)
+            return Response({'status': 'marked as available'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Unexpected error marking copy as available", exc_info=True)
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'])
     def mark_lost(self, request, pk=None):
         """Mark a copy as lost"""
         copy = self.get_object()
-        copy.status = BookCopy.LOST
-        copy.save()
-        return Response({'status': 'marked as lost'}, status=status.HTTP_200_OK)
+
+        try:
+            BookCopyService.mark_as_lost(copy)
+            return Response({'status': 'marked as lost'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Unexpected error marking copy as lost", exc_info=True)
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def by_barcode(self, request):
@@ -167,6 +192,7 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [IsLibrarianOrMemberReadOnly]
     filterset_fields = ['borrowed_by', 'book_copy', 'fine_collected']
+    search_fields = ['book_copy__book__title', 'book_copy__barcode', 'borrowed_by__username', 'borrowed_by__first_name', 'borrowed_by__last_name']
     ordering = ['-created_at']
 
     def get_queryset(self):
@@ -184,7 +210,6 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
     @action(detail=False, methods=['post'], permission_classes=[IsLibrarian], url_path='issue-book')
-    @transaction.atomic
     def issue_book(self, request):
         """Issue a book to a member. Librarians only."""
         serializer = BorrowRequestSerializer(data=request.data)
@@ -199,73 +224,28 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
             )
 
         try:
-            member = User.objects.get(id=member_id, role=User.MEMBER)
-        except User.DoesNotExist:
-            return Response(
-                {'error': 'Member not found'},
-                status=status.HTTP_404_NOT_FOUND
+            transaction_obj = TransactionService.issue_book(
+                barcode=barcode,
+                member_id=member_id,
+                issued_by_librarian_id=request.user.id
             )
 
-        if not member.is_active:
-            return Response(
-                {'error': 'Member account is not active'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            transaction_serializer = TransactionSerializer(transaction_obj)
+            return Response(transaction_serializer.data, status=status.HTTP_201_CREATED)
 
-        try:
-            book_copy = BookCopy.objects.select_related('book').get(barcode=barcode)
-        except BookCopy.DoesNotExist:
-            return Response(
-                {'error': 'Book copy not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        if book_copy.status != BookCopy.AVAILABLE:
-            return Response(
-                {'error': 'Book copy is not available for borrowing'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if book_copy.book.is_archived:
-            return Response(
-                {'error': 'This book is archived and cannot be borrowed'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        config = LibraryConfig.get_instance()
-        active_borrows_count = member.active_borrowed_copies.filter(
-            status=BookCopy.BORROWED
-        ).count()
-
-        if active_borrows_count >= config.max_books_per_member:
-            return Response(
-                {'error': f'Member has reached the maximum borrow limit of {config.max_books_per_member} books'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        duplicate_borrow = Transaction.objects.filter(
-            borrowed_by=member,
-            book_copy__book=book_copy.book,
-            returned_at__isnull=True
-        ).exists()
-
-        if duplicate_borrow:
-            return Response(
-                {'error': 'Member already has a copy of this book borrowed'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        new_transaction = Transaction.objects.create(
-            book_copy=book_copy,
-            borrowed_by=member
-        )
-
-        book_copy.status = BookCopy.BORROWED
-        book_copy.borrowed_by = member
-        book_copy.save()
-
-        transaction_serializer = TransactionSerializer(new_transaction)
-        return Response(transaction_serializer.data, status=status.HTTP_201_CREATED)
+        except BorrowLimitExceededException as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except DuplicateBorrowException as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except BookNotAvailableException as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except MemberInactiveException as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Unexpected error issuing book", exc_info=True)
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[IsLibrarian])
     def process_return(self, request, pk=None):
@@ -273,54 +253,35 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
         Process a book return and calculate fine if applicable.
         Librarians only.
         """
-        transaction = self.get_object()
+        try:
+            result = TransactionService.process_return(transaction_id=pk)
+            return Response({
+                'status': 'return processed',
+                'fine': str(result['fine']),
+                'days_borrowed': result['days_borrowed'],
+                'returned_at': result['returned_at']
+            }, status=status.HTTP_200_OK)
 
-        if transaction.returned_at:
-            return Response(
-                {'error': 'Book already returned'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        config = LibraryConfig.get_instance()
-
-        days_borrowed = (timezone.now() - transaction.created_at).days
-        if days_borrowed > config.max_borrow_days_without_fine:
-            overdue_days = days_borrowed - config.max_borrow_days_without_fine
-            fine_amount = Decimal(overdue_days) * config.fine_per_day
-        else:
-            fine_amount = Decimal('0.00')
-
-        transaction.returned_at = timezone.now()
-        transaction.fine = fine_amount
-        transaction.save()
-
-        book_copy = transaction.book_copy
-        book_copy.status = BookCopy.AVAILABLE
-        book_copy.borrowed_by = None
-        book_copy.save()
-
-        return Response({
-            'status': 'return processed',
-            'fine': str(fine_amount),
-            'days_borrowed': days_borrowed,
-            'returned_at': transaction.returned_at
-        }, status=status.HTTP_200_OK)
+        except BookAlreadyReturnedException as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Unexpected error processing return", exc_info=True)
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'], permission_classes=[IsLibrarian])
     def collect_fine(self, request, pk=None):
         """Mark fine as collected. Librarians only."""
-        transaction = self.get_object()
+        try:
+            TransactionService.collect_fine(transaction_id=pk)
+            return Response({'status': 'fine collected'}, status=status.HTTP_200_OK)
 
-        if not transaction.fine or transaction.fine == Decimal('0.00'):
-            return Response(
-                {'error': 'No fine associated with this transaction'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        transaction.fine_collected = True
-        transaction.save()
-
-        return Response({'status': 'fine collected'}, status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Unexpected error collecting fine", exc_info=True)
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def overdue(self, request):

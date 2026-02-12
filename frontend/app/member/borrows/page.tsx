@@ -5,7 +5,6 @@ import DashboardLayout from "@/app/components/layout/DashboardLayout";
 import Table, { Column } from "@/app/components/ui/Table";
 import Badge from "@/app/components/ui/Badge";
 import Alert from "@/app/components/ui/Alert";
-import LoadingSpinner from "@/app/components/ui/LoadingSpinner";
 import { getMyActiveBorrows } from "@/app/lib/api/members-service";
 import type { BookCopy } from "@/app/types/library";
 
@@ -134,17 +133,13 @@ export default function MyActiveBorrowsPage() {
           </Alert>
         )}
 
-        {loading ? (
-          <LoadingSpinner text="Loading active borrows..." />
-        ) : (
-          <Table
-            columns={columns}
-            data={borrows}
-            keyExtractor={(item) => item.id}
-            loading={false}
-            emptyMessage="No active borrows"
-          />
-        )}
+        <Table
+          columns={columns}
+          data={borrows}
+          keyExtractor={(item) => item.id}
+          loading={loading}
+          emptyMessage="No active borrows"
+        />
       </div>
     </DashboardLayout>
   );

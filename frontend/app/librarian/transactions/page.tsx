@@ -1,28 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/app/components/layout/DashboardLayout";
 import SearchBar from "@/app/components/ui/SearchBar";
-import Table, { Column } from "@/app/components/ui/Table";
+import PaginatedTable, { Column } from "@/app/components/ui/PaginatedTable";
 import Button from "@/app/components/ui/Button";
 import Modal from "@/app/components/ui/Modal";
 import Badge from "@/app/components/ui/Badge";
 import Alert from "@/app/components/ui/Alert";
 import {
-  getTransactions,
+  getTransactionsPaginated,
   processReturn,
   collectFine,
 } from "@/app/lib/api/transactions-service";
+import { usePagination } from "@/app/hooks/usePagination";
 import type { Transaction } from "@/app/types/library";
 
 type FilterTab = "all" | "active" | "overdue" | "returned";
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [filteredTransactions, setFilteredTransactions] = useState<
-    Transaction[]
-  >([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
@@ -34,13 +30,40 @@ export default function TransactionsPage() {
   const [isCollectFineModalOpen, setIsCollectFineModalOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
 
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
+  const getQueryParams = () => {
+    const params: Record<string, string | boolean> = {};
 
-  useEffect(() => {
-    filterTransactions();
-  }, [transactions, activeTab, searchQuery]);
+    if (searchQuery) {
+      params.search = searchQuery;
+    }
+
+    switch (activeTab) {
+      case "active":
+        params.active_only = true;
+        break;
+      case "overdue":
+        params.overdue_only = true;
+        break;
+      case "returned":
+        params.active_only = false;
+        break;
+    }
+
+    return params;
+  };
+
+  const {
+    data: transactions,
+    loading,
+    error: paginationError,
+    pagination,
+    setPage,
+    setPageSize,
+    refresh,
+  } = usePagination<Transaction>({
+    fetchFunction: getTransactionsPaginated,
+    queryParams: getQueryParams(),
+  });
 
   useEffect(() => {
     if (success) {
@@ -49,46 +72,11 @@ export default function TransactionsPage() {
     }
   }, [success]);
 
-  const fetchTransactions = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const data = await getTransactions();
-      setTransactions(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch transactions");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (paginationError) {
+      setError(paginationError.message || "Failed to load transactions");
     }
-  };
-
-  const filterTransactions = useCallback(() => {
-    let filtered = [...transactions];
-
-    switch (activeTab) {
-      case "active":
-        filtered = filtered.filter((t) => !t.returned_at);
-        break;
-      case "overdue":
-        filtered = filtered.filter((t) => !t.returned_at && t.is_overdue);
-        break;
-      case "returned":
-        filtered = filtered.filter((t) => t.returned_at);
-        break;
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (t) =>
-          t.book_title.toLowerCase().includes(query) ||
-          t.barcode.toLowerCase().includes(query) ||
-          t.borrower_name.toLowerCase().includes(query)
-      );
-    }
-
-    setFilteredTransactions(filtered);
-  }, [transactions, activeTab, searchQuery]);
+  }, [paginationError]);
 
   const handleProcessReturn = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -112,7 +100,7 @@ export default function TransactionsPage() {
       );
       setIsProcessReturnModalOpen(false);
       setSelectedTransaction(null);
-      await fetchTransactions();
+      refresh();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to process return"
@@ -132,7 +120,7 @@ export default function TransactionsPage() {
       setSuccess("Fine collected successfully");
       setIsCollectFineModalOpen(false);
       setSelectedTransaction(null);
-      await fetchTransactions();
+      refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to collect fine");
     } finally {
@@ -162,33 +150,27 @@ export default function TransactionsPage() {
     {
       key: "id",
       header: "Transaction ID",
-      sortable: true,
     },
     {
       key: "book_title",
       header: "Book Title",
-      sortable: true,
     },
     {
       key: "barcode",
       header: "Barcode",
-      sortable: true,
     },
     {
       key: "borrower_name",
       header: "Member Name",
-      sortable: true,
     },
     {
       key: "created_at",
       header: "Borrowed Date",
-      sortable: true,
       render: (transaction) => formatDate(transaction.created_at),
     },
     {
       key: "due_date",
       header: "Due Date",
-      sortable: true,
       render: (transaction) => formatDate(transaction.due_date),
     },
     {
@@ -284,16 +266,17 @@ export default function TransactionsPage() {
         <SearchBar
           onSearch={setSearchQuery}
           placeholder="Search by book title, barcode, or member name..."
-          loading={loading}
         />
 
-        <Table
+        <PaginatedTable
           columns={columns}
-          data={filteredTransactions}
-          keyExtractor={(transaction) => transaction.id}
+          data={transactions}
+          keyExtractor={(transaction) => transaction.id.toString()}
           loading={loading}
           emptyMessage="No transactions found"
-          pageSize={10}
+          pagination={pagination}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
         />
 
         <Modal
